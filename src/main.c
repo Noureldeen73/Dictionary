@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+typedef struct node
+{
+    char *word;
+    struct node *leftchilde, *rightchilde;
+} node;
+node *predecessor;
+node *successor;
+int iffind = 0;
+node *newnode(char *word)
+{
+    node *temp = (node *)malloc(sizeof(node));
+    temp->word = (char *)malloc(sizeof(char) * strlen(word));
+    strcpy(temp->word, word);
+    temp->leftchilde = temp->rightchilde = NULL;
+    return temp;
+}
+node *insert(node *root, char *word)
+{
+    if (root == NULL)
+        return newnode(word);
+    if (strcmp(word, root->word) < 0)
+        root->leftchilde = insert(root->leftchilde, word);
+    else if (strcmp(word, root->word) > 0)
+        root->rightchilde = insert(root->rightchilde, word);
+    return root;
+}
+
+node *search(node *root, char *word)
+{
+    node *temp = root;
+    while (temp != NULL)
+    {
+        if (strcasecmp(word, temp->word) == 0)
+        {
+            iffind = 1;
+            return temp;
+        }
+        else if (strcasecmp(word, temp->word) < 0)
+        {
+            if (temp->leftchilde != NULL)
+            {
+                temp = temp->leftchilde;
+            }
+            else
+                return temp;
+        }
+        else if (strcasecmp(word, temp->word) > 0)
+        {
+            if (temp->rightchilde != NULL)
+            {
+                temp = temp->rightchilde;
+            }
+            else
+                return temp;
+        }
+    }
+    return temp;
+}
+void findpreandsuc(node *root, node *leaf)
+{
+    if (iffind == 0)
+    {
+        if (root == leaf)
+        {
+            iffind = 1;
+        }
+        else if (root != NULL)
+        {
+            predecessor = root;
+        }
+    }
+    else if (iffind == 1)
+    {
+        if (root != NULL)
+        {
+            successor = root;
+            iffind = 2;
+        }
+    }
+    if (root)
+    {
+        findpreandsuc(root->leftchilde, leaf);
+        if (iffind == 0)
+            predecessor = root;
+        if (iffind == 1)
+        {
+            if (root != leaf)
+            {
+                successor = root;
+                iffind = 2;
+            }
+        }
+        findpreandsuc(root->rightchilde, leaf);
+    }
+    if (predecessor == successor)
+    {
+        predecessor = NULL;
+    }
+}
+void print_inorder(node *root)
+{
+    if (root)
+    {
+        print_inorder(root->leftchilde);
+        printf("%s\t", root->word);
+        print_inorder(root->rightchilde);
+    }
+}
+int main()
+{
+    node *root = NULL;
+    FILE *fp;
+    fp = fopen("Dictionary.txt", "r");
+    if (fp == NULL)
+    {
+        printf("Error opening file\n");
+        exit(1);
+    }
+    while (!feof(fp))
+    {
+        char *word = (char *)malloc(sizeof(char) * 50);
+        fscanf(fp, "%s", word);
+        root = insert(root, word);
+    }
+    fclose(fp);
+}
