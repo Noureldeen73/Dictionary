@@ -10,6 +10,7 @@ typedef struct node
 node *predecessor;
 node *successor;
 int iffind = 0;
+int count = 0;
 node *newnode(char *word)
 {
     node *temp = (node *)malloc(sizeof(node));
@@ -18,13 +19,34 @@ node *newnode(char *word)
     temp->leftchilde = temp->rightchilde = NULL;
     return temp;
 }
+int getsize(node *root)
+{
+    if (root == NULL)
+        return 0;
+    else
+        return (getsize(root->leftchilde) + 1 + getsize(root->rightchilde));
+}
+int getheight(node *root)
+{
+    if (root == NULL)
+        return 0;
+    else
+    {
+        int lheight = getheight(root->leftchilde);
+        int rheight = getheight(root->rightchilde);
+        if (lheight > rheight)
+            return (lheight + 1);
+        else
+            return (rheight + 1);
+    }
+}
 node *insert(node *root, char *word)
 {
     if (root == NULL)
         return newnode(word);
-    if (strcmp(word, root->word) < 0)
+    if (strcasecmp(word, root->word) < 0)
         root->leftchilde = insert(root->leftchilde, word);
-    else if (strcmp(word, root->word) > 0)
+    else if (strcasecmp(word, root->word) > 0)
         root->rightchilde = insert(root->rightchilde, word);
     return root;
 }
@@ -120,6 +142,11 @@ int main()
         printf("Error opening file\n");
         exit(1);
     }
+    else
+    {
+        printf("File opened successfully\n");
+    }
+    printf("--------------------------\n");
     while (!feof(fp))
     {
         char *word = (char *)malloc(sizeof(char) * 50);
@@ -127,6 +154,10 @@ int main()
         root = insert(root, word);
     }
     fclose(fp);
+    printf("Size = %d\n", getsize(root));
+    printf("--------------------------\n");
+    printf("Height = %d\n", getheight(root));
+    printf("--------------------------\n");
     char string[100];
     printf("Enter the string to be searched\n");
     gets(string);
