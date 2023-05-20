@@ -114,7 +114,7 @@ int main()
 {
     node *root = NULL;
     FILE *fp;
-    fp = fopen("Dictionary.txt", "r");
+    fp = fopen("EN-US-Dictionary.txt", "r");
     if (fp == NULL)
     {
         printf("Error opening file\n");
@@ -127,4 +127,46 @@ int main()
         root = insert(root, word);
     }
     fclose(fp);
+    char string[100];
+    printf("Enter the string to be searched\n");
+    gets(string);
+    char buffer[100];
+    int i = 0;
+    int j = 0;
+    while (string[i] != '\0')
+    {
+        j = 0;
+        while (string[i] != ' ' && string[i] != '\0')
+        {
+            buffer[j] = string[i];
+            i++;
+            j++;
+        }
+        i++;
+        while (j < i)
+            buffer[j++] = '\0';
+        node *leaf = search(root, buffer);
+        if (iffind == 1)
+        {
+            printf("%s-The word is correct\n", buffer);
+            iffind = 0;
+        }
+        else
+        {
+            printf("%s-The word is incorrect suggestions are:", buffer);
+            findpreandsuc(root, leaf);
+            printf("%s, ", leaf->word);
+            if (predecessor != NULL)
+            {
+                printf("%s, ", predecessor->word);
+            }
+            if (successor != NULL)
+            {
+                printf("%s\n", successor->word);
+            }
+            iffind = 0;
+            predecessor = NULL;
+            successor = NULL;
+        }
+    }
 }
