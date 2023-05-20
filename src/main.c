@@ -9,8 +9,6 @@ typedef struct node
 } node;
 node *predecessor;
 node *successor;
-int iffind = 0;
-int count = 0;
 node *newnode(char *word)
 {
     node *temp = (node *)malloc(sizeof(node));
@@ -44,10 +42,10 @@ node *insert(node *root, char *word)
 {
     if (root == NULL)
         return newnode(word);
-    if (strcasecmp(word, root->word) < 0)
-        root->leftchilde = insert(root->leftchilde, word);
-    else if (strcasecmp(word, root->word) > 0)
+    if (strcasecmp(word, root->word) > 0)
         root->rightchilde = insert(root->rightchilde, word);
+    else if (strcasecmp(word, root->word) < 0)
+        root->leftchilde = insert(root->leftchilde, word);
     return root;
 }
 
@@ -58,7 +56,6 @@ node *search(node *root, char *word)
     {
         if (strcasecmp(word, temp->word) == 0)
         {
-            iffind = 1;
             return temp;
         }
         else if (strcasecmp(word, temp->word) < 0)
@@ -84,52 +81,47 @@ node *search(node *root, char *word)
 }
 void findpreandsuc(node *root, node *leaf)
 {
-    if (iffind == 0)
+    if (root == NULL)
+        return;
+    if (strcasecmp(leaf->word, root->word) < 0)
     {
-        if (root == leaf)
-        {
-            iffind = 1;
-        }
-        else if (root != NULL)
-        {
-            predecessor = root;
-        }
-    }
-    else if (iffind == 1)
-    {
-        if (root != NULL)
-        {
-            successor = root;
-            iffind = 2;
-        }
-    }
-    if (root)
-    {
+        successor = root;
         findpreandsuc(root->leftchilde, leaf);
-        if (iffind == 0)
-            predecessor = root;
-        if (iffind == 1)
-        {
-            if (root != leaf)
-            {
-                successor = root;
-                iffind = 2;
-            }
-        }
+    }
+    else if (strcasecmp(leaf->word, root->word) > 0)
+    {
+        predecessor = root;
         findpreandsuc(root->rightchilde, leaf);
     }
-    if (predecessor == successor)
+    else
     {
-        predecessor = NULL;
+        if (root->leftchilde != NULL)
+        {
+            node *temp = root->leftchilde;
+            while (temp->rightchilde)
+            {
+                temp = temp->rightchilde;
+            }
+            predecessor = temp;
+        }
+        if (root->rightchilde != NULL)
+        {
+            node *temp = root->rightchilde;
+            while (temp->leftchilde)
+            {
+                temp = temp->leftchilde;
+            }
+            successor = temp;
+        }
     }
 }
-void print_inorder(node *root)
+void print_inorder(node *root, FILE *fp1)
 {
     if (root)
     {
-        print_inorder(root->leftchilde);
-        printf("%s\t", root->word);
-        print_inorder(root->rightchilde);
+        print_inorder(root->leftchilde, fp1);
+        fprintf(fp1, "%s\n", root->word);
+        print_inorder(root->rightchilde, fp1);
     }
 }
 int main()
@@ -164,23 +156,21 @@ int main()
     char buffer[100];
     int i = 0;
     int j = 0;
-    while (string[i] != '\0')
+    while (string[i] != '\0' && string[i] != '\n')
     {
         j = 0;
-        while (string[i] != ' ' && string[i] != '\0')
+        while (string[i] != ' ' && string[i] != '\0' && string[i] != '\n')
         {
             buffer[j] = string[i];
             i++;
             j++;
         }
         i++;
-        while (j < i)
-            buffer[j++] = '\0';
+        buffer[j++] = '\0';
         node *leaf = search(root, buffer);
-        if (iffind == 1)
+        if (strcasecmp(leaf->word, buffer) == 0)
         {
             printf("%s-The word is correct\n", buffer);
-            iffind = 0;
         }
         else
         {
@@ -195,7 +185,6 @@ int main()
             {
                 printf("%s\n", successor->word);
             }
-            iffind = 0;
             predecessor = NULL;
             successor = NULL;
         }
