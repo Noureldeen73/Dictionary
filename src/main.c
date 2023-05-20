@@ -159,13 +159,17 @@ int main()
     while (string[i] != '\0' && string[i] != '\n')
     {
         j = 0;
+        if (string[i] == ' ')
+        {
+            i++;
+            continue;
+        }
         while (string[i] != ' ' && string[i] != '\0' && string[i] != '\n')
         {
             buffer[j] = string[i];
             i++;
             j++;
         }
-        i++;
         buffer[j++] = '\0';
         node *leaf = search(root, buffer);
         if (strcasecmp(leaf->word, buffer) == 0)
